@@ -64,5 +64,7 @@
         <ResourceInclude Source="TwoTonePathIcon.axaml" />
         <ResourceInclude Source="UrsaView.axaml" />
         <ResourceInclude Source="UrsaWindow.axaml" />
+        <ResourceInclude Source="WindowPinToggleButton.axaml" />
+        <ResourceInclude Source="WindowPinButton.axaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

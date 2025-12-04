@@ -1,6 +1,11 @@
+using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Primitives;
+using Avalonia.Logging;
+using System.Windows.Input;
+using Ursa.Common.Windowing;
 
 namespace Ursa.Controls;
 
@@ -20,6 +25,18 @@ public class UrsaWindow : Window
     public static readonly StyledProperty<bool> IsFullScreenButtonVisibleProperty =
         AvaloniaProperty.Register<UrsaWindow, bool>(
             nameof(IsFullScreenButtonVisible));
+
+    public static readonly StyledProperty<bool> IsPinButtonVisibleProperty =
+        AvaloniaProperty.Register<UrsaWindow, bool>(
+            nameof(IsPinButtonVisible), true);
+
+    public static readonly StyledProperty<bool> IsPinnedToDesktopBottomProperty =
+        AvaloniaProperty.Register<UrsaWindow, bool>(
+            nameof(IsPinnedToDesktopBottom));
+
+    public static readonly DirectProperty<UrsaWindow, bool> CanPinToDesktopBottomProperty =
+        AvaloniaProperty.RegisterDirect<UrsaWindow, bool>(
+            nameof(CanPinToDesktopBottom), o => o._canPinToDesktopBottom);
 
     /// <summary>
     /// Defines the visibility of the minimize button.
@@ -85,11 +102,48 @@ public class UrsaWindow : Window
             nameof(TitleBarMargin));
 
     private bool _canClose;
+    private bool _canPinToDesktopBottom;
+    private IWindowStackingService _pinningService = WindowStackingService.Instance;
+    private readonly UrsaWindowTogglePinCommand _togglePinCommand;
     
     /// <summary>
     /// Gets the style key override for the control.
     /// </summary>
     protected override Type StyleKeyOverride => typeof(UrsaWindow);
+
+    public UrsaWindow()
+    {
+        _togglePinCommand = new UrsaWindowTogglePinCommand(this);
+        Opened += OnOpenedHandler;
+    }
+
+internal static class WindowStackingServiceDescriptor
+{
+    public const string Windows = "HWND";
+    public const string MacOs = "NSWindow";
+    public const string X11 = "XID";
+}
+
+internal sealed class UrsaWindowTogglePinCommand : ICommand
+{
+    private readonly UrsaWindow _window;
+
+    public UrsaWindowTogglePinCommand(UrsaWindow window)
+    {
+        _window = window;
+    }
+
+    public bool CanExecute(object? parameter) => _window.CanPinToDesktopBottom;
+
+    public async void Execute(object? parameter)
+    {
+        await _window.TogglePinAsync();
+    }
+
+    public event EventHandler? CanExecuteChanged;
+
+    public void RaiseCanExecuteChanged() => CanExecuteChanged?.Invoke(this, System.EventArgs.Empty);
+}
 
     /// <summary>
     /// Gets or sets a value indicating whether the full-screen button is visible.
@@ -99,6 +153,36 @@ public class UrsaWindow : Window
         get => GetValue(IsFullScreenButtonVisibleProperty);
         set => SetValue(IsFullScreenButtonVisibleProperty, value);
     }
+
+    public bool IsPinButtonVisible
+    {
+        get => GetValue(IsPinButtonVisibleProperty);
+        set => SetValue(IsPinButtonVisibleProperty, value);
+    }
+
+    public bool IsPinnedToDesktopBottom
+    {
+        get => GetValue(IsPinnedToDesktopBottomProperty);
+        private set => SetValue(IsPinnedToDesktopBottomProperty, value);
+    }
+
+    public bool CanPinToDesktopBottom => _canPinToDesktopBottom;
+
+    public IWindowStackingService PinningService
+    {
+        get => _pinningService;
+        set
+        {
+            var service = value ?? WindowStackingService.Instance;
+            if (!ReferenceEquals(_pinningService, service))
+            {
+                _pinningService = service;
+                _togglePinCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public ICommand TogglePinCommand => _togglePinCommand;
 
     /// <summary>
     /// Gets or sets a value indicating whether the minimize button is visible.
@@ -189,6 +273,52 @@ public class UrsaWindow : Window
         base.OnApplyTemplate(e);
         var host = e.NameScope.Find<OverlayDialogHost>(PART_DialogHost);
         if (host is not null) LogicalChildren.Add(host);
+    }
+
+    private void OnOpenedHandler(object? sender, System.EventArgs e)
+    {
+        UpdatePinCapability();
+    }
+
+    protected virtual void UpdatePinCapability()
+    {
+        var descriptor = TryGetPlatformHandle()?.HandleDescriptor;
+        bool canPin = DeterminePinCapability(descriptor);
+        if (SetAndRaise(CanPinToDesktopBottomProperty, ref _canPinToDesktopBottom, canPin))
+        {
+            _togglePinCommand.RaiseCanExecuteChanged();
+        }
+    }
+
+    protected virtual bool DeterminePinCapability(string? handleDescriptor)
+    {
+        return handleDescriptor is WindowStackingServiceDescriptor.Windows
+            or WindowStackingServiceDescriptor.MacOs
+            or WindowStackingServiceDescriptor.X11;
+    }
+
+    private async Task TogglePinAsync()
+    {
+        if (!CanPinToDesktopBottom)
+        {
+            return;
+        }
+
+        var targetState = !IsPinnedToDesktopBottom;
+        var service = PinningService ?? WindowStackingService.Instance;
+        WindowStackingResult result = targetState
+            ? await service.PinBottomAsync(this)
+            : await service.ReleaseAsync(this);
+
+        if (result.IsSuccess)
+        {
+            SetCurrentValue(IsPinnedToDesktopBottomProperty, targetState);
+        }
+        else
+        {
+            Logger.TryGet(LogEventLevel.Warning, nameof(UrsaWindow))?
+                .Log(this, result.Message ?? "Failed to toggle pin state.");
+        }
     }
 
     /// <summary>

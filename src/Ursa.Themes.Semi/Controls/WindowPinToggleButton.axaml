@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:u="https://irihi.tech/ursa">
+    <ControlTheme x:Key="{x:Type u:WindowPinToggleButton}"
+                  TargetType="u:WindowPinToggleButton"
+                  BasedOn="{StaticResource {x:Type u:IconToggleButton}}">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Icon" Value="{StaticResource SemiIconUnlock}" />
+        <Setter Property="ToolTip.Tip" Value="Pin window to desktop bottom" />
+
+        <Style Selector="^:checked">
+            <Setter Property="Icon" Value="{StaticResource SemiIconLock}" />
+            <Setter Property="ToolTip.Tip" Value="Release window pin" />
+        </Style>
+    </ControlTheme>
+</ResourceDictionary>

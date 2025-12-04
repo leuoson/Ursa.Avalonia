@@ -19,6 +19,7 @@ public class MenuViewModel : ViewModelBase
                     new() { MenuHeader = "Icon Button", Key = MenuKeys.MenuKeyIconButton, Status = "Updated" },
                     new() { MenuHeader = "AutoCompleteBox", Key = MenuKeys.MenuKeyAutoCompleteBox },
                     new() { MenuHeader = "Class Input", Key = MenuKeys.MenuKeyClassInput },
+                    new() { MenuHeader = "Window Pinning", Key = MenuKeys.MenuKeyWindowPin, Status = "New" },
                     new() { MenuHeader = "Enum Selector", Key = MenuKeys.MenuKeyEnumSelector },
                     new() { MenuHeader = "Form", Key = MenuKeys.MenuKeyForm },
                     new() { MenuHeader = "KeyGestureInput", Key = MenuKeys.MenuKeyKeyGestureInput },
@@ -162,4 +163,5 @@ public static class MenuKeys
     public const string MenuKeyPathPicker = "PathPicker";
     public const string MenuKeyAnchor = "Anchor";
     public const string MenuKeyMultiAutoCompleteBox = "MultiAutoCompleteBox";
+    public const string MenuKeyWindowPin = "WindowPin";
 }

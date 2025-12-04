@@ -2,6 +2,7 @@
     xmlns="https://github.com/avaloniaui"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:u="https://irihi.tech/ursa">
+    <Geometry x:Key="WindowPinGlyph">M10,2 L13,2 13,8 15,8 15,10 11,10 11,14 7,14 7,10 3,10 3,8 5,8 5,2 8,2 8,5 10,5z</Geometry>
     <ControlTheme x:Key="{x:Type u:UrsaWindow}" TargetType="u:UrsaWindow">
         <Setter Property="Background" Value="{DynamicResource WindowDefaultBackground}" />
         <Setter Property="TransparencyBackgroundFallback" Value="{DynamicResource WindowDefaultBackground}" />
@@ -118,6 +119,18 @@
         <Setter Property="Template">
             <ControlTemplate TargetType="u:CaptionButtons">
                 <StackPanel Orientation="Horizontal">
+                    <ToggleButton
+                        Name="PART_PinButton"
+                        Theme="{StaticResource CaptionButton}"
+                        Command="{Binding TogglePinCommand, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
+                        IsChecked="{Binding IsPinnedToDesktopBottom, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
+                        IsVisible="{Binding IsPinButtonVisible, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
+                        IsEnabled="{Binding CanPinToDesktopBottom, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}">
+                        <PathIcon
+                            Theme="{StaticResource InnerPathIcon}"
+                            Data="{StaticResource WindowPinGlyph}"
+                            Foreground="{Binding $parent[ToggleButton].Foreground}" />
+                    </ToggleButton>
                     <Button Name="PART_FullScreenButton" Theme="{StaticResource CaptionButton}">
                         <PathIcon
                             Name="PART_FullScreenButtonIcon"

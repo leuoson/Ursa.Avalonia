@@ -1,0 +1,160 @@
+<UserControl
+    x:Class="Ursa.Demo.Pages.WindowPinDemo"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:u="https://irihi.tech/ursa"
+    xmlns:vm="using:Ursa.Demo.ViewModels"
+    x:DataType="vm:WindowPinDemoViewModel"
+    x:CompileBindings="True"
+    d:DesignHeight="450"
+    d:DesignWidth="900"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <u:WindowPinCommand x:Key="DemoPinCommand" Action="Pin" />
+        <u:WindowPinCommand x:Key="DemoReleaseCommand" Action="Release" />
+        <u:WindowPinCommand x:Key="DemoToggleCommand" Action="Toggle" />
+    </UserControl.Resources>
+    <Design.DataContext>
+        <vm:WindowPinDemoViewModel />
+    </Design.DataContext>
+
+    <ScrollViewer>
+        <StackPanel Spacing="16">
+            <TextBlock Classes="H4" Text="UrsaWindow Pinning" />
+            <TextBlock TextWrapping="Wrap">
+                UrsaWindow can expose a toggle button in the title bar that keeps the window pinned to the bottom
+                of the desktop z-order. Use the controls below to interact with the host window and inspect the pin
+                service status on your current platform.
+            </TextBlock>
+
+            <Border Theme="{DynamicResource InfoCard}" Padding="12">
+                <TextBlock TextWrapping="Wrap" Text="{Binding StatusMessage}" />
+            </Border>
+
+            <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto" RowSpacing="12" ColumnSpacing="12">
+                <Border Theme="{DynamicResource CardBorder}">
+                    <StackPanel Margin="12" Spacing="4">
+                        <TextBlock Classes="CaptionStrong" Text="Pin Supported" />
+                        <TextBlock Classes="H5" Text="{Binding IsPinSupported}" />
+                    </StackPanel>
+                </Border>
+                <Border Theme="{DynamicResource CardBorder}" Grid.Column="1">
+                    <StackPanel Margin="12" Spacing="4">
+                        <TextBlock Classes="CaptionStrong" Text="Currently Pinned" />
+                        <TextBlock Classes="H5" Text="{Binding IsPinned}" />
+                    </StackPanel>
+                </Border>
+                <Border Theme="{DynamicResource CardBorder}" Grid.Column="2">
+                    <StackPanel Margin="12" Spacing="4">
+                        <TextBlock Classes="CaptionStrong" Text="Can Toggle" />
+                        <TextBlock Classes="H5" Text="{Binding CanTogglePin}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <u:Form LabelPosition="Top">
+                <StackPanel
+                    u:FormItem.Label="Pin Window"
+                    Orientation="Horizontal"
+                    Spacing="12"
+                    VerticalAlignment="Center">
+                    <u:WindowPinToggleButton />
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Text="Click to toggle the hosting window between normal and pinned-to-bottom states." />
+                </StackPanel>
+            </u:Form>
+
+            <StackPanel Spacing="8" Margin="0,8,0,0">
+                <TextBlock Classes="H5" Text="Style Variants" />
+                <TextBlock TextWrapping="Wrap">
+                    WindowPinToggleButton reuses the IconToggleButton theme, so you can apply the usual style classes or
+                    alternate themes to change the pin state colors. Each button below targets the same host window to
+                    demonstrate different visual treatments.
+                </TextBlock>
+                <WrapPanel ItemSpacing="12" LineSpacing="8">
+                    <u:WindowPinToggleButton ToolTip.Tip="Neutral (default)" />
+                    <u:WindowPinToggleButton Classes="Primary" ToolTip.Tip="Primary solid" />
+                    <u:WindowPinToggleButton Classes="Success" ToolTip.Tip="Success solid" />
+                    <u:WindowPinToggleButton Classes="Danger" ToolTip.Tip="Danger solid" />
+                    <u:WindowPinToggleButton
+                        Classes="Warning"
+                        Background="{DynamicResource ButtonOutlineBackground}"
+                        BorderBrush="{DynamicResource ButtonOutlineWarningBorderBrush}"
+                        ToolTip.Tip="Warning outline" />
+                    <u:WindowPinToggleButton
+                        Classes="Tertiary"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        ToolTip.Tip="Borderless tertiary" />
+                </WrapPanel>
+            </StackPanel>
+
+            <StackPanel Spacing="8" Margin="0,8,0,0">
+                <TextBlock Classes="H5" Text="Icon buttons (single action)" />
+                <TextBlock TextWrapping="Wrap">
+                    WindowPinButton is based on IconButton and simply triggers pin, release, or toggle actions. Use it when
+                    you want full control over the button visuals but still prefer a dedicated control instead of wiring the
+                    command manually.
+                </TextBlock>
+                <WrapPanel ItemSpacing="12" LineSpacing="8">
+                    <u:WindowPinButton ToolTip.Tip="Toggle (default)" />
+                    <u:WindowPinButton
+                        Action="Pin"
+                        Classes="Primary"
+                        Content="Pin"
+                        Icon="{StaticResource SemiIconLock}"
+                        SyncIconWithState="False"
+                        ToolTip.Tip="Force pin" />
+                    <u:WindowPinButton
+                        Action="Release"
+                        Classes="Danger"
+                        Content="Release"
+                        Icon="{StaticResource SemiIconUnlock}"
+                        SyncIconWithState="False"
+                        ToolTip.Tip="Force release" />
+                    <u:WindowPinButton
+                        Width="32"
+                        Height="32"
+                        Background="Transparent"
+                        BorderBrush="Transparent"
+                        Padding="0"
+                        ToolTip.Tip="Icon-only toggle" />
+                </WrapPanel>
+            </StackPanel>
+
+            <Button
+                Width="220"
+                Content="Refresh state from window"
+                Command="{Binding RefreshStateCommand}" />
+
+            <StackPanel Spacing="8" Margin="0,16,0,0">
+                <TextBlock Classes="H5" Text="Reuse the command with any button" />
+                <TextBlock TextWrapping="Wrap">
+                    Use <Run FontWeight="Bold">WindowPinCommand</Run> when you want to keep your own button visuals but reuse
+                    the pinning logic. The buttons below share the same command, so they work even though they are not
+                    <Run FontWeight="Bold">WindowPinToggleButton</Run> or <Run FontWeight="Bold">WindowPinButton</Run> instances.
+                </TextBlock>
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Button Content="Pin" Command="{StaticResource DemoPinCommand}" CommandParameter="{Binding $parent[u:UrsaWindow]}" />
+                    <Button Content="Release" Command="{StaticResource DemoReleaseCommand}" CommandParameter="{Binding $parent[u:UrsaWindow]}" />
+                    <ToggleButton
+                        Content="Toggle"
+                        Command="{StaticResource DemoToggleCommand}"
+                        CommandParameter="{Binding $parent[u:UrsaWindow]}"
+                        IsChecked="{Binding IsPinned, Mode=TwoWay}" />
+                </StackPanel>
+            </StackPanel>
+
+            <Border Theme="{DynamicResource CardBorder}" Padding="12" Margin="0,12,0,0">
+                <TextBlock TextWrapping="Wrap">
+                    Note: pinning requires native platform support. On Linux, `_NET_WM_STATE_BELOW` must be respected by
+                    the window manager. On macOS the window is locked near the desktop layer, and on Windows the window
+                    stays below others but remains interactive.
+                </TextBlock>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
