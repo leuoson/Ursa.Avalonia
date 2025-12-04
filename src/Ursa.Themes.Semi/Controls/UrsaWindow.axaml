@@ -119,18 +119,6 @@
         <Setter Property="Template">
             <ControlTemplate TargetType="u:CaptionButtons">
                 <StackPanel Orientation="Horizontal">
-                    <ToggleButton
-                        Name="PART_PinButton"
-                        Theme="{StaticResource CaptionButton}"
-                        Command="{Binding TogglePinCommand, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
-                        IsChecked="{Binding IsPinnedToDesktopBottom, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
-                        IsVisible="{Binding IsPinButtonVisible, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}"
-                        IsEnabled="{Binding CanPinToDesktopBottom, RelativeSource={RelativeSource AncestorType=u:UrsaWindow}}">
-                        <PathIcon
-                            Theme="{StaticResource InnerPathIcon}"
-                            Data="{StaticResource WindowPinGlyph}"
-                            Foreground="{Binding $parent[ToggleButton].Foreground}" />
-                    </ToggleButton>
                     <Button Name="PART_FullScreenButton" Theme="{StaticResource CaptionButton}">
                         <PathIcon
                             Name="PART_FullScreenButtonIcon"
